@@ -68,17 +68,7 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Composable
-fun ScreenSetup(modifier: Modifier = Modifier, viewModel: MainViewModel) {
-    val allProducts by viewModel.allProducts.observeAsState(listOf())
-    val searchResults by viewModel.searchResults.observeAsState(listOf())
-    MainScreen(
-        modifier = modifier,
-        allProducts = allProducts,
-        searchResults = searchResults,
-        viewModel = viewModel
-    )
-}
+
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
@@ -89,12 +79,15 @@ fun MainScreen(
     var productName by remember { mutableStateOf("") }
     var productQuantity by remember { mutableStateOf("") }
     var searching by remember { mutableStateOf(false) }
-    val onProductTextChange = { text : String ->
+
+    val onProductTextChange = { text: String ->
         productName = text
     }
-    val onQuantityTextChange = { text : String ->
+
+    val onQuantityTextChange = { text: String ->
         productQuantity = text
     }
+
     Column(
         horizontalAlignment = CenterHorizontally,
         modifier = modifier
@@ -106,12 +99,14 @@ fun MainScreen(
             onTextChange = onProductTextChange,
             keyboardType = KeyboardType.Text
         )
+
         CustomTextField(
             title = "Quantity",
             textState = productQuantity,
             onTextChange = onQuantityTextChange,
             keyboardType = KeyboardType.Number
         )
+
         Row(
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier
@@ -131,18 +126,21 @@ fun MainScreen(
             }) {
                 Text("Add")
             }
+
             Button(onClick = {
                 searching = true
                 viewModel.findProduct(productName)
             }) {
                 Text("Search")
             }
+
             Button(onClick = {
                 searching = false
                 viewModel.deleteProduct(productName)
             }) {
                 Text("Delete")
             }
+
             Button(onClick = {
                 searching = false
                 productName = ""
@@ -151,21 +149,44 @@ fun MainScreen(
                 Text("Clear")
             }
         }
-    }
-    LazyColumn(
-        Modifier
-            .fillMaxWidth()
-            .padding(10.dp)
-    ) {
-        val list = if (searching) searchResults else allProducts
-        item {
-            TitleRow(head1 = "ID", head2 = "Product", head3 = "Quantity")
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(10.dp)
+        ) {
+            val list = if (searching) searchResults else allProducts
+
+            item {
+                TitleRow(
+                    head1 = "ID",
+                    head2 = "Product",
+                    head3 = "Quantity"
+                )
+            }
+
+            items(list) { product ->
+                ProductRow(
+                    id = product.id,
+                    name = product.productName,
+                    quantity = product.quantity
+                )
+            }
         }
-        items(list) { product ->
-            ProductRow(id = product.id, name = product.productName,
-                quantity = product.quantity)
-        }
     }
+}
+
+@Composable
+fun ScreenSetup(modifier: Modifier = Modifier, viewModel: MainViewModel) {
+    val allProducts by viewModel.allProducts.observeAsState(listOf())
+    val searchResults by viewModel.searchResults.observeAsState(listOf())
+    MainScreen(
+        modifier = modifier,
+        allProducts = allProducts,
+        searchResults = searchResults,
+        viewModel = viewModel
+    )
 }
 @Composable
 fun TitleRow(head1: String, head2: String, head3: String) {
